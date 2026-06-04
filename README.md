@@ -1,4 +1,4 @@
-# JavaScript Practice & Challenges 🌐
+# JavaScript Practice & Challenges 
 
 A collection of JavaScript exercises and small projects for me learn and perfect my Javascript skills.
 
