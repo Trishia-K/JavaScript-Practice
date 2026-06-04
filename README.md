@@ -11,12 +11,4 @@ A collection of JavaScript exercises and small projects for me learn and perfect
 | `Grade Calculator.js` | Takes exam scores and returns a grade classification | Arrays, loops, average calculation, conditionals |
 | `Password validator.js` | Validates password strength and lists what is missing | Regex, arrays, loops, boolean logic, DOM/browser |
 
-## Concepts Covered So Far
-- Variables — `let`, `const`
-- Functions and parameters
-- Conditionals — `if`, `else if`, `else`
-- Loops — `for`
-- Arrays and array methods — `push`
-- Template literals
-- Regular expressions (Regex) — `/\d/`, `/[A-Z]/`, `/[!@#$%]/`
-- DOM interaction — `prompt()`, `console.log()`
+
