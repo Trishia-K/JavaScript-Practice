@@ -1,0 +1,147 @@
+<!--<!DOCTYPE html>
+<html>
+  <head>
+    <title>Payroll Calculator</title>
+  </head>
+  <body>
+    <h1>Payroll Calculator</h1>
+    
+     Input area -->
+   <!--<label>Enter Gross Salary (UGX):</label>
+    <input type="number" id="salaryInput">
+    <button onclick="calculate()">Calculate</button>
+    
+    Results area 
+    <div id="results"></div>
+
+    <script src="Payroll Calculator.js"></script>
+  </body>
+</html>-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll Calculator</title>
+    <style>
+        /* Base styles and modern font resetting */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* Container card to hold the calculator elements */
+        .calculator-card {
+            background-color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        h1 {
+            color: #1a365d;
+            font-size: 1.8rem;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.75rem;
+        }
+
+        /* Input area styling */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+
+        input[type="number"] {
+            padding: 0.75rem;
+            font-size: 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus {
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+        }
+
+        /* Button styling with smooth hover transitions */
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #2b6cb0;
+        }
+
+        /* Results section styling */
+        #results {
+            margin-top: 1.5rem;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px dashed #e2e8f0;
+            font-size: 0.95rem;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            margin-top: 0.5rem;
+            padding-top: 0.75rem;
+            border-top: 2px solid #2f855a;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2f855a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator-card">
+        <h1>Payroll Calculator</h1>
+        
+        <div class="input-group">
+            <label for="salaryInput">Enter Gross Salary (UGX):</label>
+            <input type="number" id="salaryInput" placeholder="e.g. 600000">
+        </div>
+        
+        <button onclick="calculate()">Calculate Net Salary</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script src="Payroll Calculator.js"></script>
+</body>
+</html>
