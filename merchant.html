@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RukaPay Merchant Fee Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── Design Tokens ─────────────────────────────── */
+    :root {
+      --ruka-blue:      #0f1a60;
+      --ruka-dark:      #08113f;
+      --ruka-mid:       #1a3a6b;
+      --ruka-light:     #e8ecf7;
+      --ruka-pale:      #f0f4ff;
+      --accent-gold:    #F5A623;
+      --accent-red:     #E8475F;
+      --text-primary:   #0D1F17;
+      --text-secondary: #4A6B5A;
+      --text-muted:     #8AA89A;
+      --bg:             #F7FDFB;
+      --white:          #FFFFFF;
+      --border:         #d0d8ef;
+      --shadow-sm:      0 2px 8px rgba(15,26,96,0.08);
+      --shadow-md:      0 8px 32px rgba(15,26,96,0.12);
+      --shadow-lg:      0 20px 60px rgba(15,26,96,0.16);
+      --radius:         16px;
+      --radius-sm:      10px;
+    }
+
+    /* ── Reset & Base ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background Texture ────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 10% 0%, rgba(15,26,96,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 90% 100%, rgba(8,17,63,0.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Layout ────────────────────────────────────── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ── Header ────────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 52px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-mark {
+      height: 44px;
+      display: flex;
+      align-items: center;
+    }
+
+    .logo-mark img {
+      height: 38px;
+      display: block;
+    }
+
+    .logo-text {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: var(--ruka-dark);
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text span {
+      color: var(--ruka-blue);
+    }
+
+    .header-badge {
+      background: var(--ruka-light);
+      border: 1px solid var(--border);
+      color: var(--ruka-mid);
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 99px;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── Hero ──────────────────────────────────────── */
+    .hero {
+      margin-bottom: 44px;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--ruka-blue);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 99px;
+      margin-bottom: 16px;
+    }
+
+    .hero-tag::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    h1 {
+     font-family: 'DM Sans', sans-serif;
+      font-size: clamp(1.9rem, 4vw, 2.8rem);
+      font-weight: 800;
+      color: var(--ruka-dark);
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+
+    h1 em {
+      font-style: normal;
+      color: var(--ruka-blue);
+    }
+
+    .hero-sub {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      font-weight: 300;
+      max-width: 500px;
+      line-height: 1.7;
+    }
+
+    /* ── Main Grid ─────────────────────────────────── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 680px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Cards ─────────────────────────────────────── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 14px;
+      background: var(--ruka-blue);
+      border-radius: 2px;
+    }
+
+    /* ── Form Elements ─────────────────────────────── */
+    .field {
+      margin-bottom: 22px;
+    }
+
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      letter-spacing: 0.1px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-prefix {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      pointer-events: none;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 13px 16px 13px 52px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: var(--ruka-pale);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
+
+    select {
+      padding-left: 16px;
+      cursor: pointer;
+    }
+
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--ruka-blue);
+      background: white;
+      box-shadow: 0 0 0 4px rgba(15,26,96,0.1);
+    }
+
+    .hint {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+      font-style: italic;
+    }
+
+    /* ── Method Pills ──────────────────────────────── */
+    .method-pills {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .pill {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--ruka-pale);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill input[type="radio"] { display: none; }
+
+    .pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .pill-info { flex: 1; }
+
+    .pill-name {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      display: block;
+    }
+
+    .pill-rate {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .pill.active,
+    .pill:has(input:checked) {
+      border-color: var(--ruka-blue);
+      background: #f0f4ff;
+    }
+
+    .pill.active .pill-dot,
+    .pill:has(input:checked) .pill-dot {
+      background: var(--ruka-blue);
+      box-shadow: 0 0 0 3px rgba(15,26,96,0.15);
+    }
+
+    .pill.active .pill-name,
+    .pill:has(input:checked) .pill-name {
+      color: var(--ruka-blue);
+      font-weight: 600;
+    }
+
+    /* ── Results Panel ─────────────────────────────── */
+    .results-card {
+      background: var(--ruka-blue);
+      border: none;
+      color: white;
+    }
+
+    .results-card .card-title {
+      color: rgba(255,255,255,0.5);
+    }
+
+    .results-card .card-title::before {
+      background: var(--ruka-blue);
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .result-row:last-of-type {
+      border-bottom: none;
+    }
+
+    .result-label {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.55);
+      font-weight: 400;
+    }
+
+    .result-value {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.3px;
+      text-align: right;
+    }
+
+    .result-value.green  { color: #a8c0ff; }
+    .result-value.red    { color: #fca5a5; }
+    .result-value.gold   { color: #fbbf24; }
+    .result-value.muted  { color: rgba(255,255,255,0.35); font-size: 0.85rem; font-family: 'DM Sans', sans-serif; font-weight: 300; }
+
+    /* ── Savings Hero Block ─────────────────────────── */
+    .savings-hero {
+      background: linear-gradient(135deg, #1a3a6b, #0f1a60);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      margin: 20px 0 4px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .savings-hero::before {
+      content: '';
+      position: absolute;
+      top: -20px; right: -20px;
+      width: 80px; height: 80px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 50%;
+    }
+
+    .savings-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30px; left: -10px;
+      width: 100px; height: 100px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+    }
+
+    .savings-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 6px;
+    }
+
+    .savings-amount {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .savings-sub {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.6);
+      margin-top: 5px;
+    }
+
+    /* ── Fee Breakdown Bar ─────────────────────────── */
+    .breakdown-section {
+      margin-top: 24px;
+    }
+
+    .breakdown-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 12px;
+    }
+
+    .bar-track {
+      background: rgba(255,255,255,0.08);
+      border-radius: 99px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: #5b7fd4;
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+    }
+
+    .bar-labels span:first-child { color: #a8c0ff; }
+    .bar-labels span:last-child  { color: rgba(255,255,255,0.35); }
+
+    /* ── Comparison Table ──────────────────────────── */
+    .compare-section {
+      margin-top: 32px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .compare-header {
+      background: #e8ecf7;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .compare-header h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--ruka-blue);
+      letter-spacing: 0.3px;
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .compare-table th {
+      padding: 12px 20px;
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .compare-table th:not(:first-child) { text-align: right; }
+
+    .compare-table td {
+      padding: 14px 20px;
+      font-size: 0.87rem;
+      color: var(--text-primary);
+      border-bottom: 1px solid rgba(208,234,224,0.5);
+    }
+
+    .compare-table td:not(:first-child) {
+      text-align: right;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+    }
+
+    .compare-table tr:last-child td { border-bottom: none; }
+
+    .compare-table tr.rukapay-row {
+      background: #f0f4ff;
+    }
+
+    .compare-table tr.rukapay-row td:first-child {
+      font-weight: 600;
+      color: var(--ruka-blue);
+    }
+
+    .badge-best {
+      background: var(--ruka-blue);
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 99px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    .compare-table .cheaper { color: #1a3a6b; font-weight: 600; }
+    .compare-table .pricier { color: var(--accent-red); }
+
+    /* ── Empty State ───────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 24px 0 8px;
+      color: rgba(255,255,255,0.3);
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+
+    .empty-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      opacity: 0.3;
+    }
+
+    /* ── Footer Note ───────────────────────────────── */
+    .footer-note {
+      margin-top: 32px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    .footer-note strong {
+      color: var(--ruka-blue);
+    }
+
+    /* ── Fade in ───────────────────────────────────── */
+    .fade-in {
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .delay-1 { animation-delay: 0.05s; }
+    .delay-2 { animation-delay: 0.1s; }
+    .delay-3 { animation-delay: 0.15s; }
+    .delay-4 { animation-delay: 0.2s; }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Header -->
+  <header class="header fade-in">
+    <div class="logo-area">
+      <div class="logo-mark">
+        <img src="https://i.imgur.com/NUf6a9M.png" alt="RukaPay"/>
+      </div>
+    </div>
+    <div class="header-badge">Merchant Tools</div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero fade-in delay-1">
+    <div class="hero-tag">Calculator</div>
+    <h1>Know exactly what you<br/>keep with <em>RukaPay</em></h1>
+    <p class="hero-sub">Enter your monthly transaction details below and instantly see your fees, net revenue, and how much you save compared to other payment methods.</p>
+  </section>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+
+    <!-- Input Card -->
+    <div class="card fade-in delay-2">
+      <div class="card-title">Your Transaction Details</div>
+
+      <!-- Average transaction -->
+      <div class="field">
+        <label for="avgTxn">Average transaction amount</label>
+        <div class="input-wrap">
+          <span class="input-prefix">UGX</span>
+          <input type="number" id="avgTxn" placeholder="e.g. 50000" min="0"/>
+        </div>
+        <div class="hint">What does a typical customer pay you?</div>
+      </div>
+
+      <!-- Number of transactions -->
+      <div class="field">
+        <label for="numTxn">Transactions per month</label>
+        <div class="input-wrap">
+          <span class="input-prefix">#</span>
+          <input type="number" id="numTxn" placeholder="e.g. 200" min="0" style="padding-left: 38px"/>
+        </div>
+        <div class="hint">How many payments do you receive monthly?</div>
+      </div>
+
+      <!-- Payment method -->
+      <div class="field">
+        <label>Payment method your customers use</label>
+        <div class="method-pills" id="methodPills">
+          <label class="pill active">
+            <input type="radio" name="method" value="mtn" checked/>
+            <div class="pill-dot"></div>
+            <div class="pill-info">
+              <span class="pill-name">MTN MoMo</span>
+              <span class="pill-rate">1.5% fee</span>
+            </div>
+          </label>
+          <label class="pill">
+            <input type="radio" name="method" value="airtel"/>
+            <div class="pill-dot"></div>
+            <div class="pill-info">
+              <span class="pill-name">Airtel Money</span>
+              <span class="pill-rate">1.5% fee</span>
+            </div>
+          </label>
+          <label class="pill">
+            <input type="radio" name="method" value="bank"/>
+            <div class="pill-dot"></div>
+            <div class="pill-info">
+              <span class="pill-name">Bank Transfer</span>
+              <span class="pill-rate">1.0% fee</span>
+            </div>
+          </label>
+          <label class="pill">
+            <input type="radio" name="method" value="wallet"/>
+            <div class="pill-dot"></div>
+            <div class="pill-info">
+              <span class="pill-name">RukaPay Wallet</span>
+              <span class="pill-rate">0.5% fee</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Results Card -->
+    <div class="card results-card fade-in delay-3" id="resultsCard">
+      <div class="card-title">Your Monthly Breakdown</div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">💳</div>
+        Enter your details on the left<br/>to see your results
+      </div>
+
+      <!-- Results (hidden until calculated) -->
+      <div id="resultsContent" style="display:none">
+
+        <div class="result-row">
+          <span class="result-label">Monthly volume</span>
+          <span class="result-value" id="r-volume">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">RukaPay fee rate</span>
+          <span class="result-value" id="r-rate">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Total fees charged</span>
+          <span class="result-value red" id="r-fee">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Your net revenue</span>
+          <span class="result-value green" id="r-net">—</span>
+        </div>
+
+        <!-- Savings hero -->
+        <div class="savings-hero">
+          <div class="savings-label">You save vs. competitors</div>
+          <div class="savings-amount" id="r-savings">—</div>
+          <div class="savings-sub" id="r-savings-sub">per month compared to standard mobile money rates</div>
+        </div>
+
+        <!-- Bar -->
+        <div class="breakdown-section">
+          <div class="breakdown-title">Revenue retained</div>
+          <div class="bar-track">
+            <div class="bar-fill" id="r-bar"></div>
+          </div>
+          <div class="bar-labels">
+            <span id="r-bar-keep">—% kept</span>
+            <span id="r-bar-fee">—% fee</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison Table -->
+  <div class="compare-section fade-in delay-4" id="compareSection" style="display:none">
+    <div class="compare-header">
+      <h3>How RukaPay compares to other options</h3>
+    </div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Provider</th>
+          <th>Fee Rate</th>
+          <th>Monthly Fee</th>
+          <th>You Keep</th>
+        </tr>
+      </thead>
+      <tbody id="compareBody">
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-note fade-in">
+    <strong>Note:</strong> Fee rates shown are indicative. Actual rates depend on your merchant agreement with RukaPay.<br/>
+    Built for RukaPay merchant onboarding — <strong>rukapay.co.ug</strong>
+  </div>
+
+</div>
+
+<script>
+  /* ─────────────────────────────────────────────────
+     DATA
+  ───────────────────────────────────────────────── */
+
+  // Fee rates per payment method on RukaPay
+  const RUKAPAY_RATES = {
+    mtn:    { label: "MTN MoMo",       rate: 0.015 },
+    airtel: { label: "Airtel Money",   rate: 0.015 },
+    bank:   { label: "Bank Transfer",  rate: 0.010 },
+    wallet: { label: "RukaPay Wallet", rate: 0.005 }
+  };
+
+  // Competitor rates (standard market rates in Uganda)
+  const COMPETITORS = [
+    { name: "MTN MoMo Direct",   rate: 0.020 },
+    { name: "Airtel Money Direct",rate: 0.020 },
+    { name: "Yo Uganda",         rate: 0.025 },
+    { name: "DusuPay",           rate: 0.028 }
+  ];
+
+  /* ─────────────────────────────────────────────────
+     HELPERS
+  ───────────────────────────────────────────────── */
+
+  // Format a number as UGX with commas  e.g. 49250 → "UGX 49,250"
+  function formatUGX(amount) {
+    if (isNaN(amount)) return "—";
+    return "UGX " + Math.round(amount).toLocaleString("en-UG");
+  }
+
+  // Format a percentage e.g. 0.015 → "1.5%"
+  function formatPct(rate) {
+    return (rate * 100).toFixed(1) + "%";
+  }
+
+  /* ─────────────────────────────────────────────────
+     CORE CALCULATION
+  ───────────────────────────────────────────────── */
+
+  function calculate() {
+
+    // 1. Read inputs from the form
+    const avgTxn     = parseFloat(document.getElementById("avgTxn").value);
+    const numTxn     = parseFloat(document.getElementById("numTxn").value);
+    const methodKey  = document.querySelector('input[name="method"]:checked').value;
+
+    // 2. Guard: if inputs are empty or invalid, show empty state
+    if (isNaN(avgTxn) || isNaN(numTxn) || avgTxn <= 0 || numTxn <= 0) {
+      document.getElementById("emptyState").style.display    = "block";
+      document.getElementById("resultsContent").style.display = "none";
+      document.getElementById("compareSection").style.display = "none";
+      return;
+    }
+
+    // 3. Core math
+    const rukaRate      = RUKAPAY_RATES[methodKey].rate;
+    const monthlyVolume = avgTxn * numTxn;
+    const rukaFee       = monthlyVolume * rukaRate;
+    const netRevenue    = monthlyVolume - rukaFee;
+
+    // 4. Savings vs best competitor rate (2%)
+    const competitorFee = monthlyVolume * 0.020;
+    const savings       = competitorFee - rukaFee;
+
+    // 5. Percentage kept (for the progress bar)
+    const keepPct = ((netRevenue / monthlyVolume) * 100).toFixed(1);
+    const feePct  = (100 - keepPct).toFixed(1);
+
+    /* ── Update Results Panel ── */
+    document.getElementById("emptyState").style.display     = "none";
+    document.getElementById("resultsContent").style.display = "block";
+
+    document.getElementById("r-volume").textContent  = formatUGX(monthlyVolume);
+    document.getElementById("r-rate").textContent    = formatPct(rukaRate);
+    document.getElementById("r-fee").textContent     = formatUGX(rukaFee);
+    document.getElementById("r-net").textContent     = formatUGX(netRevenue);
+    document.getElementById("r-savings").textContent = formatUGX(savings);
+
+    // Change savings colour: green if positive, red if RukaPay is more expensive
+    const savingsEl = document.getElementById("r-savings");
+    savingsEl.className = "savings-amount " + (savings >= 0 ? "" : "red");
+
+    if (savings <= 0) {
+      document.getElementById("r-savings-sub").textContent = "compared to standard mobile money rates";
+    } else {
+      document.getElementById("r-savings-sub").textContent =
+        "saved per month vs. standard mobile money rates";
+    }
+
+    // Animate the bar
+    setTimeout(() => {
+      document.getElementById("r-bar").style.width = keepPct + "%";
+    }, 50);
+
+    document.getElementById("r-bar-keep").textContent = keepPct + "% kept";
+    document.getElementById("r-bar-fee").textContent  = feePct + "% fee";
+
+    /* ── Update Comparison Table ── */
+    document.getElementById("compareSection").style.display = "block";
+
+    // Build the RukaPay row + all competitor rows, sorted by fee ascending
+    const allProviders = [
+      {
+        name:    "RukaPay (" + RUKAPAY_RATES[methodKey].label + ")",
+        rate:    rukaRate,
+        fee:     rukaFee,
+        net:     netRevenue,
+        isRuka:  true
+      },
+      ...COMPETITORS.map(c => ({
+        name:   c.name,
+        rate:   c.rate,
+        fee:    monthlyVolume * c.rate,
+        net:    monthlyVolume - (monthlyVolume * c.rate),
+        isRuka: false
+      }))
+    ].sort((a, b) => a.fee - b.fee);  // cheapest first
+
+    const tbody = document.getElementById("compareBody");
+    tbody.innerHTML = "";
+
+    allProviders.forEach((p, index) => {
+      const tr = document.createElement("tr");
+      if (p.isRuka) tr.className = "rukapay-row";
+
+      const isCheapest = index === 0;
+
+      tr.innerHTML = `
+        <td>
+          ${p.name}
+          ${isCheapest ? '<span class="badge-best">Best</span>' : ""}
+        </td>
+        <td class="${p.isRuka ? 'cheaper' : 'pricier'}">${formatPct(p.rate)}</td>
+        <td class="${p.isRuka ? 'cheaper' : 'pricier'}">${formatUGX(p.fee)}</td>
+        <td>${formatUGX(p.net)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* ─────────────────────────────────────────────────
+     EVENT LISTENERS
+     — recalculate every time anything changes
+  ───────────────────────────────────────────────── */
+
+  document.getElementById("avgTxn").addEventListener("input", calculate);
+  document.getElementById("numTxn").addEventListener("input", calculate);
+
+  // Listen to all radio buttons
+  document.querySelectorAll('input[name="method"]').forEach(radio => {
+    radio.addEventListener("change", function() {
+      // Update active pill styling
+      document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+      this.closest(".pill").classList.add("active");
+      // Recalculate
+      calculate();
+    });
+  });
+</script>
+</body>
+</html>
