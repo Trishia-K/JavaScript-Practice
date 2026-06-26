@@ -59,7 +59,7 @@ console.log("4. Find Item (Found):", finditem(items, "silver"));
 
 
 // 5. Reverse an array
-function reversethearray(arr) {
+ function reversethearray(arr) {
   let reversedResult = [];
   for (let i = arr.length - 1; i >= 0; i--) {
     reversedResult.push(arr[i]);

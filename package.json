@@ -1,0 +1,25 @@
+{
+  "name": "javascript-practice",
+  "version": "1.0.0",
+  "description": "A collection of JavaScript exercises and small projects for me learn and perfect my Javascript skills.",
+  "main": "Grade Calculator.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Trishia-K/JavaScript-Practice.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Trishia-K/JavaScript-Practice/issues"
+  },
+  "homepage": "https://github.com/Trishia-K/JavaScript-Practice#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}
